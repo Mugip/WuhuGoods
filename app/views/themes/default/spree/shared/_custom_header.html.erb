@@ -1,0 +1,99 @@
+<%# encoding: utf-8 %>
+<%# ============================================================
+    WuhuGoods Premium Header v4
+    - Desktop nav + mobile drawer
+    - Mobile account icon visible
+    - High z-index & pointer safety
+    - Turbo-aware JS hooks
+    ============================================================ %>
+
+<header class="wuhu-header" data-wuhu-header>
+  <div class="wuhu-container">
+
+    <!-- Mobile Toggle -->
+    <button
+      type="button"
+      class="wuhu-mobile-toggle"
+      id="wuhu-mobile-toggle"
+      aria-label="Open menu"
+      aria-controls="wuhu-mobile-drawer"
+      aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <div class="wuhu-logo">
+      <%= link_to spree.root_path do %>
+        WuhuGoods
+      <% end %>
+    </div>
+
+    <!-- Desktop Nav -->
+    <nav class="wuhu-nav" aria-label="Primary">
+      <%= link_to 'Home', spree.root_path, class: 'nav-link' %>
+
+      <div class="nav-dropdown">
+        <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+          Categories <i class="fa-solid fa-chevron-down"></i>
+        </a>
+        <div class="dropdown-menu" role="menu">
+          <%= link_to 'Electronics',     '/t/electronics',  class: 'dropdown-item', role: 'menuitem' %>
+          <%= link_to 'Fashion',         '/t/fashion',      class: 'dropdown-item', role: 'menuitem' %>
+          <%= link_to 'Home & Living',   '/t/home-living',  class: 'dropdown-item', role: 'menuitem' %>
+          <%= link_to 'Toys & Kids',     '/t/toys-kids',    class: 'dropdown-item', role: 'menuitem' %>
+        </div>
+      </div>
+
+      <%= link_to 'Flash Deals', '#flash', class: 'nav-link' %>
+      <%= link_to 'Contact Us',  '#contact', class: 'nav-link' %>
+    </nav>
+
+    <!-- Icons -->
+    <div class="wuhu-icons">
+      <%= link_to spree.cart_path, class: 'icon-link', title: 'Cart', aria: { label: 'Cart' } do %>
+        <i class="fa-solid fa-cart-shopping"></i>
+      <% end %>
+
+      <%= link_to spree.account_path, class: 'icon-link icon-account', title: 'Account', aria: { label: 'Account' } do %>
+        <i class="fa-solid fa-user"></i>
+      <% end %>
+    </div>
+
+  </div>
+</header>
+
+<!-- Mobile Drawer -->
+<div id="wuhu-mobile-drawer" class="wuhu-mobile-drawer" aria-hidden="true">
+  <div class="wuhu-mobile-overlay" data-wuhu-mobile-close></div>
+  <div class="wuhu-mobile-menu" role="dialog" aria-modal="true">
+    <button
+      class="wuhu-mobile-close"
+      id="wuhu-mobile-close"
+      data-wuhu-mobile-close
+      aria-label="Close menu">&times;</button>
+
+    <nav class="wuhu-mobile-nav" aria-label="Mobile navigation">
+      <%= link_to 'Home', spree.root_path, class: 'wuhu-mobile-item' %>
+
+      <details class="wuhu-mobile-accordion">
+        <summary>Categories</summary>
+        <div class="wuhu-mobile-accordion-body">
+          <%= link_to 'Electronics',   '/t/electronics',  class: 'wuhu-mobile-subitem' %>
+          <%= link_to 'Fashion',       '/t/fashion',      class: 'wuhu-mobile-subitem' %>
+          <%= link_to 'Home & Living', '/t/home-living',  class: 'wuhu-mobile-subitem' %>
+          <%= link_to 'Toys & Kids',   '/t/toys-kids',    class: 'wuhu-mobile-subitem' %>
+        </div>
+      </details>
+
+      <%= link_to 'Flash Deals', '#flash',   class: 'wuhu-mobile-item' %>
+      <%= link_to 'Contact Us',  '#contact', class: 'wuhu-mobile-item' %>
+
+      <hr class="wuhu-mobile-separator">
+
+      <%= link_to spree.cart_path,    class: 'wuhu-mobile-item' do %>Cart<% end %>
+      <%= link_to spree.account_path, class: 'wuhu-mobile-item' do %>Account<% end %>
+    </nav>
+  </div>
+</div>
+
+<!-- END _custom_header.html.erb -->

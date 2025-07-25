@@ -1,0 +1,285 @@
+/* ============================================================
+   WuhuGoods Header v4
+   ============================================================ */
+
+/* ---------- Palette ---------- */
+:root {
+  --wuhu-gold:        #d4af37;
+  --wuhu-rust:        #b37400;
+  --wuhu-rust-dark:   #8b4000;
+  --wuhu-cream:       #fff8e1;
+  --wuhu-cream-light: #ffe0b2;
+  --wuhu-cream-btn:   #fff3e0;
+  --wuhu-text:        #444;
+  --wuhu-text-inv:    #fff;
+}
+
+/* Offset body content so fixed header doesn’t cover it */
+body.wuhu-custom-storefront {
+  padding-top: 72px;
+}
+@media (max-width:768px){
+  body.wuhu-custom-storefront { padding-top: 60px; }
+}
+
+/* ---------- Header ---------- */
+.wuhu-header {
+  background: linear-gradient(90deg, var(--wuhu-cream), var(--wuhu-cream-light));
+  border-bottom: 2px solid var(--wuhu-gold);
+  padding: 10px 0;
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  width: 100%;
+  z-index: 5000; /* above everything */
+  transition: transform 0.3s ease-in-out;
+  pointer-events: auto;
+}
+.wuhu-header.hidden-header { transform: translateY(-100%); }
+
+/* Container */
+.wuhu-container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(8px, 2vw, 24px);
+  flex-wrap: nowrap;
+  min-height: 40px;
+}
+
+/* Logo */
+.wuhu-logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--wuhu-rust);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wuhu-logo a:hover { color: var(--wuhu-rust-dark); }
+
+/* Desktop nav */
+.wuhu-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 20px);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 60%;
+}
+@media (min-width:1025px){
+  .wuhu-nav{max-width:none;}
+}
+.nav-link {
+  color: var(--wuhu-text);
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background-color: var(--wuhu-cream-btn);
+  white-space: nowrap;
+}
+.nav-link:hover,
+.nav-link.is-active {
+  background: var(--wuhu-gold);
+  color: var(--wuhu-text-inv);
+}
+
+/* Dropdown */
+.nav-dropdown { position: relative; }
+.dropdown-toggle i { margin-left: 5px; font-size: 0.8rem; }
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: var(--wuhu-cream);
+  border: 1px solid var(--wuhu-gold);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  min-width: 200px;
+  z-index: 5100;
+}
+.nav-dropdown:hover .dropdown-menu { display: block; }
+.dropdown-item {
+  display: block;
+  padding: 10px 15px;
+  color: var(--wuhu-text);
+  text-decoration: none;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+.dropdown-item:hover {
+  background: var(--wuhu-gold);
+  color: var(--wuhu-text-inv);
+}
+
+/* Icons */
+.wuhu-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  white-space: nowrap;
+}
+.icon-link {
+  color: var(--wuhu-text);
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+  text-decoration: none;
+  line-height: 1;
+}
+.icon-link:hover { color: var(--wuhu-gold); }
+
+/* ---------- Mobile Rules ---------- */
+.wuhu-mobile-toggle {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--wuhu-rust);
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  position: relative;
+  z-index: 5050;
+}
+
+@media (max-width:768px){
+  /* grid layout: toggle | logo | icons */
+  .wuhu-container{
+    display:grid;
+    grid-template-columns:32px 1fr auto;
+    align-items:center;
+    gap:8px;
+  }
+  .wuhu-logo{ text-align:center; }
+  .wuhu-nav{ display:none!important; }
+  .wuhu-mobile-toggle{ display:inline-flex!important; justify-content:center; align-items:center; }
+  .wuhu-icons{ gap:12px; }
+  /* previously hidden: now show */
+  .wuhu-icons .icon-account{ display:inline-block!important; }
+}
+
+/* ---------- Mobile Drawer ---------- */
+.wuhu-mobile-drawer {
+  position:fixed;
+  inset:0;
+  z-index:4900;
+  display:none;
+  pointer-events:none;
+}
+.wuhu-mobile-drawer.active {
+  display:block;
+  pointer-events:auto;
+}
+.wuhu-mobile-overlay {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+}
+.wuhu-mobile-menu {
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  width:250px;
+  background:var(--wuhu-cream);
+  padding:20px;
+  transform:translateX(-100%);
+  transition:transform 0.3s ease;
+  overflow-y:auto;
+  border-right:2px solid var(--wuhu-gold);
+}
+.wuhu-mobile-drawer.active .wuhu-mobile-menu { transform:translateX(0); }
+.wuhu-mobile-close {
+  position:absolute;
+  top:10px;
+  right:10px;
+  font-size:1.5rem;
+  background:none;
+  border:none;
+  color:var(--wuhu-rust);
+  cursor:pointer;
+  line-height:1;
+}
+
+.wuhu-mobile-nav {
+  margin-top:40px;
+  display:grid;
+  gap:12px;
+}
+.wuhu-mobile-item {
+  display:block;
+  padding:10px 0;
+  color:var(--wuhu-text);
+  font-weight:500;
+  text-decoration:none;
+}
+.wuhu-mobile-item:hover { color:var(--wuhu-gold); }
+
+.wuhu-mobile-accordion summary {
+  cursor:pointer;
+  list-style:none;
+  padding:10px 0;
+  color:var(--wuhu-text);
+  font-weight:500;
+}
+.wuhu-mobile-accordion summary::-webkit-details-marker{display:none;}
+.wuhu-mobile-accordion[open] summary{color:var(--wuhu-gold);}
+.wuhu-mobile-accordion-body {
+  margin-left:16px;
+  display:grid;
+  gap:8px;
+}
+.wuhu-mobile-subitem {
+  display:block;
+  padding:6px 0;
+  color:var(--wuhu-text);
+  text-decoration:none;
+  font-size:0.95rem;
+}
+.wuhu-mobile-subitem:hover { color:var(--wuhu-gold); }
+
+.wuhu-mobile-separator {
+  margin:16px 0;
+  border:none;
+  border-top:1px solid var(--wuhu-gold);
+}
+
+/* ---------- Kill Switch: Hide Spree Header/Nav Artifacts ---------- */
+body.wuhu-custom-storefront [data-controller="mobile-nav"],
+body.wuhu-custom-storefront .header--mobile-menu,
+body.wuhu-custom-storefront .header--nav-link,
+body.wuhu-custom-storefront .header--nav-link *,
+body.wuhu-custom-storefront #header-logo,
+body.wuhu-custom-storefront .header--mega-nav-close-submenu,
+body.wuhu-custom-storefront [data-controller="header"] {
+  display:none!important;
+  visibility:hidden!important;
+  max-height:0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  position:absolute!important;
+  top:-9999px!important;
+  left:-9999px!important;
+}
+
+/* ---------- Debug helper (remove/comment once stable) ---------- */
+/*
+@media (max-width:768px){
+  .wuhu-header{outline:2px solid red;}
+  .wuhu-container{outline:2px solid yellow;}
+  #wuhu-mobile-toggle{outline:2px solid lime;}
+  .wuhu-icons{outline:2px solid cyan;}
+}
+*/
+/* Prevent body scroll while drawer open */
+body.wuhu-drawer-open {
+  touch-action: none;
+  overscroll-behavior: none;
+}

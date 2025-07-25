@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WuhuGoods</title>
+  <%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
+  <%= javascript_include_tag 'application', 'data-turbo-track': 'reload', defer: true %>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .carousel-container {
+      scroll-snap-type: x mandatory;
+    }
+    .carousel-item {
+      scroll-snap-align: start;
+      flex: none;
+    }
+    .bg-gold { background-color: #b8860b; }
+    .text-gold { color: #b8860b; }
+    .bg-cream { background-color: #f5f5dc; }
+    .text-charcoal { color: #36454F; }
+  </style>
+</head>
+
+<body class="bg-cream text-charcoal font-sans">
+
+  <!-- Header -->
+  <header class="bg-gold text-white p-4 text-center text-xl font-bold">WuhuGoods</header>
+
+  <!-- Search -->
+  <div class="p-4">
+    <input type="text" placeholder="Search products..." class="w-full p-2 rounded border" />
+  </div>
+
+  <!-- Hero Slider with Swipe -->
+  <div id="hero-slider" class="relative overflow-hidden w-full h-64 sm:h-80 md:h-[500px]">
+    <div id="hero-track" class="flex transition-transform duration-700 ease-in-out w-full h-full">
+      <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1920&q=80" class="w-full object-cover flex-shrink-0" />
+      <img src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=1920&q=80" class="w-full object-cover flex-shrink-0" />
+      <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1920&q=80" class="w-full object-cover flex-shrink-0" />
+      <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1920&q=80" class="w-full object-cover flex-shrink-0" />
+      <img src="https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1920&q=80" alt="Home living room" class="w-full object-cover flex-shrink-0" />
+    </div>
+    <button id="prev-slide" class="absolute left-2 top-1/2 transform -translate-y-1/2 text-white bg-black/50 p-2 rounded-full z-10 hover:bg-black/70">←</button>
+    <button id="next-slide" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-black/50 p-2 rounded-full z-10 hover:bg-black/70">→</button>
+  </div>
+
+  <!-- Categories -->
+  <div class="px-4 py-2 font-bold text-gold text-lg">Categories</div>
+  <div class="overflow-x-auto whitespace-nowrap flex space-x-4 px-4 py-4 bg-white">
+    <button class="bg-[#b8860b] text-white px-6 py-2 rounded-full min-w-[120px] font-semibold whitespace-nowrap" onclick="filterCategory('electronics')">Electronics</button>
+    <button class="bg-[#b8860b] text-white px-6 py-2 rounded-full min-w-[120px] font-semibold whitespace-nowrap" onclick="filterCategory('fashion')">Fashion</button>
+    <button class="bg-[#b8860b] text-white px-6 py-2 rounded-full min-w-[120px] font-semibold whitespace-nowrap" onclick="filterCategory('home')">Home & Living</button>
+    <button class="bg-[#b8860b] text-white px-6 py-2 rounded-full min-w-[120px] font-semibold whitespace-nowrap" onclick="filterCategory('toys')">Toys & Kids</button>
+  </div>
+
+  <!-- Products Section -->
+  <div id="productsContainer"></div>
+
+  <!-- JS Logic -->
+  <script>
+    // Hero Slider Logic with Swipe
+    const track = document.getElementById("hero-track");
+    const slides = track.children;
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+
+    function showSlide(index) {
+      track.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    document.getElementById("prev-slide").addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+      showSlide(currentIndex);
+    });
+
+    document.getElementById("next-slide").addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % totalSlides;
+      showSlide(currentIndex);
+    });
+
+    let startX = 0;
+    track.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    track.addEventListener("touchend", (e) => {
+      const endX = e.changedTouches[0].clientX;
+      if (startX - endX > 50) {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        showSlide(currentIndex);
+      } else if (endX - startX > 50) {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        showSlide(currentIndex);
+      }
+    });
+
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % totalSlides;
+      showSlide(currentIndex);
+    }, 6000);
+
+    // Product Carousel Logic
+    const categories = {
+      electronics: [
+        { name: "Phone", image: "<%= asset_path 'electronics.jpg' %>", price: 199, oldPrice: 599 },
+        { name: "Laptop", image: "<%= asset_path 'electronics.jpg' %>", price: 799, oldPrice: 1500 },
+      ],
+      fashion: [
+        { name: "Dress", image: "<%= asset_path 'fashion.jpg' %>", price: 49, oldPrice: 149 },
+        { name: "Shoes", image: "<%= asset_path 'fashion.jpg' %>", price: 89, oldPrice: 249 },
+      ],
+      home: [
+        { name: "Chair", image: "<%= asset_path 'home.jpg' %>", price: 129, oldPrice: 399 },
+        { name: "Lamp", image: "<%= asset_path 'home.jpg' %>", price: 39, oldPrice: 129 },
+      ],
+      toys: [
+        { name: "Teddy", image: "<%= asset_path 'toys.jpg' %>", price: 25, oldPrice: 89 },
+        { name: "Blocks", image: "<%= asset_path 'toys.jpg' %>", price: 45, oldPrice: 159 },
+      ],
+    };
+
+    function renderCategory(category) {
+      const container = document.getElementById("productsContainer");
+      const products = categories[category] || [];
+      container.innerHTML = `
+        <div class="px-4 py-2 font-bold text-gold text-lg capitalize">${category}</div>
+        <div class="flex space-x-4 overflow-x-auto px-4 pb-4 carousel-container">
+          ${products.map(prod => `
+            <div class="carousel-item bg-white shadow rounded p-2 w-48 flex-shrink-0">
+              <img src="${prod.image}" alt="${prod.name}" class="w-full h-32 object-cover rounded mb-2" />
+              <div class="text-center text-charcoal font-semibold">${prod.name}</div>
+              <div class="flex justify-center items-center space-x-2 mt-1">
+                <span class="text-red-600 text-lg font-bold">$${prod.price}</span>
+                <span class="line-through text-sm text-gray-500">$${prod.oldPrice}</span>
+              </div>
+            </div>
+          `).join('')}
+          <div class="carousel-item flex items-center justify-center w-48 text-blue-600 font-semibold underline cursor-pointer">Show more</div>
+        </div>
+      `;
+    }
+
+    function filterCategory(cat) {
+      renderCategory(cat);
+    }
+
+    renderCategory('electronics');
+  </script>
+
+</body>
+</html>

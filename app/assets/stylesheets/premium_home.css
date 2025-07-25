@@ -1,0 +1,116 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f5f5dc;
+  color: #222;
+}
+
+.header {
+  background: #b76e79;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.search-bar {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  max-height: 300px;
+}
+
+.hero-slider {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.hero-slider img {
+  width: 100%;
+  object-fit: cover;
+  height: 300px;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  background-color: rgba(0,0,0,0.3);
+  color: white;
+  padding: 0.5rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.left {
+  left: 10px;
+}
+
+.right {
+  right: 10px;
+}
+
+.category-section {
+  padding: 1rem;
+}
+
+.category-title {
+  font-size: 1.5rem;
+  color: #d4af37;
+  font-weight: bold;
+}
+
+.product-row {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  gap: 1rem;
+}
+
+.product {
+  min-width: 150px;
+  background: white;
+  border-radius: 8px;
+  padding: 0.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.product-name {
+  margin: 0.5rem 0 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.product-price {
+  margin-top: 0.2rem;
+  color: #e60000;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 0.2rem;
+}
+
+.new-price {
+  font-weight: bold;
+}

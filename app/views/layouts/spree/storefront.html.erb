@@ -1,0 +1,38 @@
+<html lang="<%= I18n.locale %>">
+  <head>
+    <%= render 'spree/shared/head' %>
+    <%= render 'spree/shared/custom_head' %>
+    <%= render 'spree/shared/json_ld' %>
+    <%= current_store.storefront_custom_code_head&.html_safe %>
+    <%= stylesheet_link_tag 'premium_home', media: 'all', 'data-turbo-track': 'reload' %>
+  </head>
+  <body class="wuhu-custom-storefront bg-background w-full text-text">
+    <%= current_store.storefront_custom_code_body_start&.html_safe %>
+    
+    <!-- Custom Header -->
+    <%= render 'spree/shared/custom_header' %>
+
+    <!-- Premium Body for Homepage -->
+    <% if controller_name == 'home' && action_name == 'index' %>
+      <%= render template: 'spree/home/index' %>
+
+
+      <%= render 'promo_banner' %> 
+      <%= render 'why_us' %>
+      <%= render 'testimonials' %> 
+      <%= render 'footer' %> 
+    <% else %>
+      <%= yield %>
+    <% end %>
+
+    <%= current_store.storefront_custom_code_body_end&.html_safe %>
+    <%= render_storefront_partials(:body_end_partials) %>
+    <%= javascript_include_tag 'premium_home', 'data-turbo-track': 'reload' %>
+  </body>
+</html>
+
+<% unless Rails.env.test? %>
+  <template id="csrf_meta_tags">
+    <%= csrf_meta_tags %>
+  </template>
+<% end %>

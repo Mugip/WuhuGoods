@@ -1759,3 +1759,25 @@ body:has(.currency-and-locale-modal:not(.hidden)) .page-contents {
     aspect-ratio: 1.77;
   }
 }
+
+:root {
+  --gold: #C28818;
+  --rust: #D2691E;
+  --cream: #FFF9EC;
+  --charcoal: #333333;
+  --red: #E63946;
+}
+
+.bg-gold { background-color: var(--gold); }
+.bg-rust { background-color: var(--rust); }
+.bg-cream { background-color: var(--cream); }
+.text-charcoal { color: var(--charcoal); }
+.text-red { color: var(--red); }
+.line-through { text-decoration: line-through; }
+
+.product-img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}

@@ -3,3 +3,7 @@
 //= link_tree ../../../vendor/javascript .js
 //= link_tree ../builds
 //= link application.css
+//= link wuhu_header.css
+//= link wuhu_header.js
+//= link premium_home.css
+//= link premium_home.js
