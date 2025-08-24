@@ -69,6 +69,33 @@ module CjDropshipping
       !@access_token.nil?
     end
 
+    def search_products_by_category(category_name, params = {})
+      unless authenticated?
+        raise "Not authenticated with CJ API. Please call fetch_access_token first."
+      end
+
+      default_params = {
+        pageNum: 1,
+        pageSize: 50,
+        warehouse: @warehouse,
+        categoryName: category_name
+      }.merge(params)
+
+      # Try to search by category name
+      response = HTTParty.get(
+        "#{BASE_URL}/product/list",
+        headers: {
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json',
+          'CJ-Access-Token' => @access_token
+        },
+        query: default_params,
+        timeout: 30
+      )
+
+      handle_response(response)
+    end
+
     def fetch_product_list(page_num: 1, page_size: 20, **params)
       get_products(params.merge('pageNum' => page_num, 'pageSize' => page_size))
     end
