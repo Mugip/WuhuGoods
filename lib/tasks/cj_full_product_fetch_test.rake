@@ -13,8 +13,8 @@ namespace :cj do
 
     puts Rainbow("[CJ] Fetching a small sample product list...").blue
 
-    # Fetch sample products (first 5)
-    sample_response = client.fetch_product_list(page_num: 1, page_size: 5)
+    # Fetch sample products (first 10)
+    sample_response = client.fetch_product_list(page_num: 1, page_size: 20)
 
     # Determine correct key for list
     products = sample_response["resultList"] || sample_response[:list] || []
