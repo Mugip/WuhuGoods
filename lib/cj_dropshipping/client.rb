@@ -76,7 +76,7 @@ module CjDropshipping
 
       default_params = {
         pageNum: 1,
-        pageSize: 50,
+        pageSize: 200,
         warehouse: @warehouse,
         categoryName: category_name
       }.merge(params)
@@ -96,7 +96,7 @@ module CjDropshipping
       handle_response(response)
     end
 
-    def fetch_product_list(page_num: 1, page_size: 20, **params)
+    def fetch_product_list(page_num: 1, page_size: 200, **params)
       get_products(params.merge('pageNum' => page_num, 'pageSize' => page_size))
     end
 
@@ -107,7 +107,7 @@ module CjDropshipping
 
       default_params = {
         pageNum: 1,
-        pageSize: 50,
+        pageSize: 200,
         warehouse: @warehouse
       }.merge(params)
 
@@ -161,7 +161,7 @@ module CjDropshipping
       default_params = {
         keyword: keyword,
         pageNum: 1,
-        pageSize: 50,
+        pageSize: 200,
         warehouse: @warehouse
       }.merge(params)
 

@@ -7,11 +7,18 @@ namespace :cj do
     category_name = ENV['CJ_CATEGORY_NAME'] || 'Lady Dresses'
     puts "[CJ] Searching for category: #{category_name}"
     
-    # Create tmp directory if it doesn't exist
-    tmp_dir = Rails.root.join('tmp', 'cj_products')
-    FileUtils.mkdir_p(tmp_dir)
+    # Create organized directory structure
+    category_slug = category_name.parameterize.underscore
+    base_dir = Rails.root.join('tmp', 'cj_products')
+    category_dir = base_dir.join(category_slug)
+    products_dir = category_dir.join('products')
+    details_dir = category_dir.join('details')
     
-    output_file = tmp_dir.join("#{category_name.parameterize.underscore}_products_#{Time.now.to_i}.json")
+    FileUtils.mkdir_p(products_dir)
+    FileUtils.mkdir_p(details_dir)
+    
+    products_file = products_dir.join('list.json')
+    metadata_file = category_dir.join('metadata.json')
     
     begin
       client = CjDropshipping::Client.new
@@ -19,7 +26,7 @@ namespace :cj do
       puts "[CJ] Fetching products for category: #{category_name}..."
       
       # Fetch products with larger page size to get more results for filtering
-      response = client.get_products('pageNum' => 1, 'pageSize' => 50)
+      response = client.get_products('pageNum' => 1, 'pageSize' => 200)
       
       puts "[DEBUG] API response code: #{response['code']}"
       puts "[DEBUG] API success: #{response['success']}"
@@ -41,14 +48,28 @@ namespace :cj do
         puts "[CJ] Available categories: #{all_categories.join(', ')}"
         
         if category_products.any?
-          # Save filtered products to tmp file
-          File.write(output_file, JSON.pretty_generate({
+          # Save filtered products to organized file structure
+          products_data = {
             category: category_name,
             total_count: category_products.size,
+            fetched_at: Time.now.iso8601,
             products: category_products
-          }))
+          }
           
-          puts "✅  Saved #{category_products.size} products to: #{output_file}"
+          File.write(products_file, JSON.pretty_generate(products_data))
+          puts "✅  Saved #{category_products.size} products to: #{products_file}"
+          
+          # Save metadata
+          metadata = {
+            category: category_name,
+            category_slug: category_slug,
+            total_products_found: category_products.size,
+            available_categories: all_categories,
+            last_updated: Time.now.iso8601
+          }
+          
+          File.write(metadata_file, JSON.pretty_generate(metadata))
+          puts "✅  Metadata saved to: #{metadata_file}"
           
           # Test full product details for the first product in the category
           first_product = category_products.first
@@ -64,8 +85,8 @@ namespace :cj do
             puts "    Price: #{full_details['data']['price']}"
             puts "    Stock: #{full_details['data']['stock']}"
             
-            # Save full details to another file
-            full_details_file = tmp_dir.join("#{first_product['pid']}_full_details.json")
+            # Save full details to organized location
+            full_details_file = details_dir.join("#{first_product['pid']}.json")
             File.write(full_details_file, JSON.pretty_generate(full_details))
             puts "    Full details saved to: #{full_details_file}"
           else
@@ -74,12 +95,13 @@ namespace :cj do
         else
           puts "❌  No products found in category '#{category_name}'"
           
-          # Save all products for debugging
-          all_products_file = tmp_dir.join('all_products.json')
+          # Save all products for debugging in organized location
+          all_products_file = category_dir.join('all_products_debug.json')
           File.write(all_products_file, JSON.pretty_generate({
             total_count: all_products.size,
             categories: all_categories,
-            products: all_products
+            products: all_products,
+            searched_category: category_name
           }))
           puts "    All products saved to: #{all_products_file} for debugging"
         end
