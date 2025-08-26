@@ -425,7 +425,7 @@ GEM
     parser (3.3.8.0)
       ast (~> 2.4.1)
       racc
-    payment_icons (1.7.56)
+    payment_icons (1.7.57)
       frozen_record
       railties (>= 5.0)
       sassc-rails
@@ -761,7 +761,7 @@ GEM
     spree_sample (5.1.3)
       ffaker (~> 2.9)
       spree_core (>= 5.1.3)
-    spree_storefront (5.1.3)
+    spree_storefront (5.1.5)
       active_link_to
       canonical-rails (~> 0.2.14)
       heroicon
@@ -769,7 +769,7 @@ GEM
       local_time (~> 3.0)
       mail_form
       payment_icons
-      spree_core (>= 5.1.3)
+      spree_core (>= 5.1.5)
       sprockets (>= 4.0)
       stimulus-rails
       tailwindcss-rails
