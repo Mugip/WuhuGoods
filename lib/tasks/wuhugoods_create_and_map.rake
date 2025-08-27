@@ -1,16 +1,17 @@
 # lib/tasks/wuhugoods_create_and_map.rake
 namespace :wuhugoods do
-  desc "Create and map products from CJ JSON"
+  desc "Create and map products from CJ detailed JSON files"
   task create_and_map: :environment do
     require 'json'
     require 'securerandom'
     require 'open-uri'
+    require 'set'
 
     category = ENV["CJ_CATEGORY_NAME"] || "Lady Dresses"
     debug    = ENV["DEBUG"] == "true"
 
-    puts "[WuhuGoods] ⚡ Processing CJ category: #{category}"
-    puts "[WuhuGoods] ⚡ Debug mode: #{debug}"
+    puts "[WuhuGoods] ⚡  Processing CJ category: #{category}"
+    puts "[WuhuGoods] ⚡  Debug mode: #{debug}"
 
     # Start timing
     start_time = Time.current
@@ -18,80 +19,53 @@ namespace :wuhugoods do
     store = Spree::Store.default || Spree::Store.first
     puts "[WuhuGoods] Using store: #{store.name}" if debug
 
-    safe_category = category.strip.downcase.gsub(" ", "_")
-    json_path = Rails.root.join("tmp/cj_products/#{safe_category}/products/list.json")
+    safe_category = category.encode('UTF-8', invalid: :replace, undef: :replace)
+                          .gsub(/[^\p{Alnum}\s_-]/, '') # remove hidden chars
+                          .strip
+                          .downcase
+                          .gsub(/\s+/, "_")
+    details_path  = Rails.root.join("tmp/cj_products/#{safe_category}/details")
 
-    unless File.exist?(json_path)
-      puts "[WuhuGoods] ❌ No file found: #{json_path}"
+    unless Dir.exist?(details_path)
+      puts "[WuhuGoods] ❌  No details directory found: #{details_path}"
       next
     end
 
-    puts "[WuhuGoods] ?? Found JSON file: #{json_path}"
-
-    begin
-      raw_data = JSON.parse(File.read(json_path))
-      puts "[WuhuGoods] ?? JSON parsed successfully, entries: #{raw_data.is_a?(Array) ? raw_data.size : raw_data['products']&.size || 'unknown'}"
-    rescue => e
-      puts "[WuhuGoods] ❌ Failed to parse JSON: #{e.message}"
-      puts e.backtrace.first(5) if debug
+    detail_files = Dir.glob(details_path.join("*.json"))
+    if detail_files.empty?
+      puts "[WuhuGoods] ❌  No detail files found in #{details_path}"
       next
     end
 
-    data =
-      if raw_data.is_a?(Hash) && raw_data["products"]
-        raw_data["products"]
-      elsif raw_data.is_a?(Array)
-        raw_data
-      else
-        puts "[WuhuGoods] ❌ Unexpected JSON structure"
-        next
-    end
-
-    puts "[WuhuGoods] ?? Processing #{data.size} products..."
+    puts "[WuhuGoods] ✅ Found #{detail_files.size} detailed product files..."
 
     # Preload existing data to reduce database queries
     existing_skus = Spree::Variant.pluck(:sku)
     puts "[WuhuGoods] ?? Found #{existing_skus.size} existing variants in database" if debug
     
     shipping_category = Spree::ShippingCategory.first_or_create!(name: "Default")
-    tax_category = Spree::TaxCategory.first_or_create!(name: "Default")
-    stock_location = Spree::StockLocation.first_or_create!(name: "Default")
-    
+    tax_category      = Spree::TaxCategory.first_or_create!(name: "Default")
+    stock_location    = Spree::StockLocation.first_or_create!(name: "Default")
+
     # Create option types
     color_option_type = Spree::OptionType.find_or_create_by!(name: "color", presentation: "Color")
-    size_option_type = Spree::OptionType.find_or_create_by!(name: "size", presentation: "Size")
-    
+    size_option_type  = Spree::OptionType.find_or_create_by!(name: "size",  presentation: "Size")
+
     created, updated, failed = 0, 0, 0
     seen_skus = []
 
-    data.each_with_index do |item, index|
+    detail_files.each_with_index do |file_path, index|
       begin
-        puts "[WuhuGoods][#{index + 1}/#{data.size}] Processing..." if debug && (index % 10 == 0)
-        
-        sku   = item["sku"] || item["productSku"]
+        raw = JSON.parse(File.read(file_path))
+        item = raw["data"] || raw
+
+        sku = item["sku"] || item["productSku"]
         if sku.blank?
-          puts "[WuhuGoods] ⚠️  Skipping item without SKU: #{item.inspect}" if debug
+          puts "[WuhuGoods] ⚠️  Skipping detail file #{file_path} with no SKU"
           next
         end
 
-        # Load detailed product information from individual detail file
-        detail_file_path = Rails.root.join("tmp/cj_products/#{safe_category}/details/#{item['pid'] || item['id']}.json")
-        detail_data = {}
-        
-        if File.exist?(detail_file_path)
-          begin
-            detail_data = JSON.parse(File.read(detail_file_path))
-            detail_data = detail_data["data"] if detail_data["data"]
-            puts "[WuhuGoods] ?? Loaded detail data for #{sku}" if debug
-          rescue => e
-            puts "[WuhuGoods] ⚠️  Failed to load detail file #{detail_file_path}: #{e.message}"
-          end
-        else
-          puts "[WuhuGoods] ⚠️  No detail file found: #{detail_file_path}"
-        end
-
-        # Merge detail data with main item data (detail data takes precedence)
-        item = detail_data.merge(item) if detail_data.any?
+        puts "[WuhuGoods][#{index + 1}/#{detail_files.size}] Processing SKU #{sku}"
 
         # Use English name if available, otherwise fallback
         name  = item["productNameEn"] || item["productName"] || "Product #{sku}"
@@ -145,6 +119,7 @@ namespace :wuhugoods do
             description: description,
             price: price,
             available_on: Time.current,
+	    status: :active,
             deleted_at: nil,
             weight: weight,
             cost_price: cost_price
@@ -158,6 +133,7 @@ namespace :wuhugoods do
             description: description,
             price: price,
             available_on: Time.current,
+            status: :active,
             shipping_category: shipping_category,
             tax_category: tax_category,
             weight: weight
@@ -221,7 +197,7 @@ namespace :wuhugoods do
 
         # Handle images
         if images.any?
-          puts "[WuhuGoods] ?? Processing #{images.size} images for #{sku}" if debug
+          puts "[WuhuGoods] ??️  Processing #{images.size} images for #{sku}" if debug
           
           # Clear existing images first
           product.images.destroy_all if product.images.any?
@@ -240,7 +216,7 @@ namespace :wuhugoods do
               
               puts "[WuhuGoods] ✅ Image added: #{image_url}" if debug
             rescue => e
-              puts "[WuhuGoods] ⚠️ Failed to download image #{image_url}: #{e.message}"
+              puts "[WuhuGoods] ⚠️  Failed to download image #{image_url}: #{e.message}"
             end
           end
         end
@@ -258,13 +234,10 @@ namespace :wuhugoods do
           size_values = Set.new
           
           item["variants"].each do |v|
-            if v["variantKey"].present?
-              # Parse variant key like "Green-S", "Green-M", etc.
-              if v["variantKey"].include?('-')
-                color, size = v["variantKey"].split('-', 2)
-                color_values.add(color.strip) if color.present?
-                size_values.add(size.strip) if size.present?
-              end
+            if v["variantKey"].present? && v["variantKey"].include?('-')
+              color, size = v["variantKey"].split('-', 2)
+              color_values.add(color.strip) if color.present?
+              size_values.add(size.strip) if size.present?
             end
           end
           
@@ -350,7 +323,7 @@ namespace :wuhugoods do
 
       rescue => e
         failed += 1
-        puts "[WuhuGoods] ❌ Failed #{item["sku"]}: #{e.message}"
+        puts "[WuhuGoods] ❌ Failed #{file_path}: #{e.message}"
         puts e.backtrace.first(5) if debug
       end
     end
@@ -361,7 +334,7 @@ namespace :wuhugoods do
       stale_skus = existing_skus - seen_skus
       
       if stale_skus.any?
-        puts "[WuhuGoods] ?? Found #{stale_skus.size} orphan products to remove"
+        puts "[WuhuGoods] ??️ Found #{stale_skus.size} orphan products to remove"
         
         stale_skus.each do |sku|
           variant = Spree::Variant.find_by(sku: sku)
@@ -369,25 +342,25 @@ namespace :wuhugoods do
           
           product = variant.product
           if product
-            puts "[WuhuGoods] ?? Removing orphan product #{product.name} (#{variant.sku})"
+            puts "[WuhuGoods] ??️ Removing orphan product #{product.name} (#{variant.sku})"
             product.destroy
           else
-            puts "[WuhuGoods] ⚠ Orphan variant #{variant.sku} had no product, deleting variant"
+            puts "[WuhuGoods] ??️ Orphan variant #{variant.sku} had no product, deleting variant"
             variant.destroy
           end
         end
       end
     else
-      puts "[WuhuGoods] ⚠ Skipping orphan cleanup due to previous errors"
+      puts "[WuhuGoods] ⚠️  Skipping orphan cleanup due to previous errors"
     end
 
     end_time = Time.current
     duration = (end_time - start_time).round(2)
 
-    puts "[WuhuGoods] ✅ Done! (#{duration}s)"
-    puts "[WuhuGoods] → Created: #{created}"
-    puts "[WuhuGoods] → Updated: #{updated}"
-    puts "[WuhuGoods] → Failed: #{failed}"
-    puts "[WuhuGoods] → Removed: #{stale_skus&.size || 0}"
+    puts "[WuhuGoods] ?? Done! (#{duration}s)"
+    puts "[WuhuGoods] ?? Created: #{created}"
+    puts "[WuhuGoods] ?? Updated: #{updated}"
+    puts "[WuhuGoods] ?? Failed: #{failed}"
+    puts "[WuhuGoods] ?? Removed: #{stale_skus&.size || 0}"
   end
 end
