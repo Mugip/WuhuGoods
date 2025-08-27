@@ -1,5 +1,0 @@
-=== [Wed Aug 27 12:25:06 AM UTC 2025] Fetching products from CJ ===
-/usr/bin/env: ‘ruby’: No such file or directory
-=== [Wed Aug 27 12:25:06 AM UTC 2025] Importing products to Spree store ===
-/usr/bin/env: ‘ruby’: No such file or directory
-=== [Wed Aug 27 12:25:06 AM UTC 2025] Product sync completed ===
